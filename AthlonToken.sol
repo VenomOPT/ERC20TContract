@@ -12,6 +12,8 @@ contract ERC20Interface {
     function transfer(address to, uint tokens) public returns (bool success);
     function approve(address spender, uint tokens) public returns (bool success);
     function transferFrom(address from, address to, uint tokens) public returns (bool success);
+    function mint(address to, uint amount) external);
+    function burn (uint amount) external);
 
     event Transfer(address indexed from, address indexed to, uint tokens);
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
@@ -32,7 +34,7 @@ contract SafeMath {
 }
 
 
-contract Athlon is ERC20Interface, SafeMath {
+contract CodeWithJoe is ERC20Interface, SafeMath {
     string public name;
     string public symbol;
     uint8 public decimals; // 18 decimals is the strongly suggested default, avoid changing it
@@ -51,7 +53,7 @@ contract Athlon is ERC20Interface, SafeMath {
         name = "Athlon";
         symbol = "ATH";
         decimals = 18;
-        _totalSupply = 100000000000;
+        _totalSupply = 10000000000;
 
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
@@ -75,18 +77,12 @@ contract Athlon is ERC20Interface, SafeMath {
         return true;
     }
 
-    function transfer(address to, uint tokens) public returns (bool success) {
-        balances[msg.sender] = safeSub(balances[msg.sender], tokens);
-        balances[to] = safeAdd(balances[to], tokens);
-        emit Transfer(msg.sender, to, tokens);
-        return true;
+    function mint(address to, uint amount) external {
+        require(msg.sender == admin, 'only admin');
+        _mint(to,amount);
     }
 
-    function transferFrom(address from, address to, uint tokens) public returns (bool success) {
-        balances[from] = safeSub(balances[from], tokens);
-        allowed[from][msg.sender] = safeSub(allowed[from][msg.sender], tokens);
-        balances[to] = safeAdd(balances[to], tokens);
-        emit Transfer(from, to, tokens);
-        return true;
+    function burn (uint amount) external {
+        _burn(msg.sender, amount);
     }
-}
+}          
